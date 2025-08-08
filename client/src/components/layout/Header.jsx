@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { Suspense, lazy, useState } from "react";
-import { orange } from "../../constants/color";
+import { styled } from "@mui/material/styles";
 import {
   Add as AddIcon,
   Menu as MenuIcon,
@@ -35,6 +35,92 @@ import { resetNotificationCount } from "../../redux/reducers/chat";
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotifcationDialog = lazy(() => import("../specific/Notifications"));
 const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
+
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  background: `
+    linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(30, 30, 30, 0.95) 50%, rgba(13, 13, 13, 0.95) 100%),
+    radial-gradient(circle at 30% 30%, rgba(102, 126, 234, 0.1) 0%, transparent 50%)
+  `,
+  backdropFilter: "blur(20px)",
+  borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+  boxShadow: `
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1)
+  `,
+  position: "relative",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "2px",
+    background: "linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.5) 50%, transparent 100%)",
+  },
+}));
+
+const StyledTypography = styled(Typography)(({ theme }) => ({
+  background: "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundClip: "text",
+  fontWeight: 700,
+  letterSpacing: "1px",
+  textShadow: "0 2px 4px rgba(0, 0, 0, 0.5)",
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  color: "rgba(255, 255, 255, 0.8)",
+  background: "rgba(255, 255, 255, 0.05)",
+  backdropFilter: "blur(10px)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  borderRadius: "12px",
+  margin: "0 4px",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    background: "rgba(255, 255, 255, 0.1)",
+    color: "rgba(255, 255, 255, 1)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.3)",
+    border: "1px solid rgba(102, 126, 234, 0.3)",
+  },
+  "&:active": {
+    transform: "translateY(0px)",
+  },
+}));
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "white",
+    fontWeight: 600,
+    fontSize: "11px",
+    minWidth: "18px",
+    height: "18px",
+    boxShadow: "0 2px 8px rgba(102, 126, 234, 0.4)",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+  },
+}));
+
+const FloatingElement = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  width: "60px",
+  height: "60px",
+  borderRadius: "50%",
+  background: "linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)",
+  filter: "blur(30px)",
+  animation: "float 8s ease-in-out infinite",
+  "@keyframes float": {
+    "0%, 100%": {
+      transform: "translateX(0px) scale(1)",
+      opacity: 0.3,
+    },
+    "50%": {
+      transform: "translateX(20px) scale(1.2)",
+      opacity: 0.6,
+    },
+  },
+}));
 
 const Header = () => {
   const navigate = useNavigate();
@@ -75,37 +161,34 @@ const Header = () => {
   return (
     <>
       <Box sx={{ flexGrow: 1 }} height={"4rem"}>
-        <AppBar
-          position="static"
-          sx={{
-            bgcolor: orange,
-          }}
-        >
-          <Toolbar>
-            <Typography
+        <StyledAppBar position="static">
+          {/* Floating background elements */}
+          <FloatingElement sx={{ top: "10%", left: "20%", animationDelay: "0s" }} />
+          <FloatingElement sx={{ top: "60%", right: "30%", animationDelay: "3s" }} />
+          
+          <Toolbar sx={{ position: "relative", zIndex: 1 }}>
+            <StyledTypography
               variant="h6"
               sx={{
                 display: { xs: "none", sm: "block" },
               }}
             >
-              Chattu
-            </Typography>
+              ChatNext
+            </StyledTypography>
 
             <Box
               sx={{
                 display: { xs: "block", sm: "none" },
               }}
             >
-              <IconButton color="inherit" onClick={handleMobile}>
+              <StyledIconButton onClick={handleMobile}>
                 <MenuIcon />
-              </IconButton>
+              </StyledIconButton>
             </Box>
-            <Box
-              sx={{
-                flexGrow: 1,
-              }}
-            />
-            <Box>
+            
+            <Box sx={{ flexGrow: 1 }} />
+            
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <IconBtn
                 title={"Search"}
                 icon={<SearchIcon />}
@@ -138,7 +221,7 @@ const Header = () => {
               />
             </Box>
           </Toolbar>
-        </AppBar>
+        </StyledAppBar>
       </Box>
 
       {isSearch && (
@@ -164,16 +247,29 @@ const Header = () => {
 
 const IconBtn = ({ title, icon, onClick, value }) => {
   return (
-    <Tooltip title={title}>
-      <IconButton color="inherit" size="large" onClick={onClick}>
+    <Tooltip 
+      title={title}
+      componentsProps={{
+        tooltip: {
+          sx: {
+            background: "rgba(15, 15, 15, 0.9)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            color: "rgba(255, 255, 255, 0.9)",
+            fontSize: "12px",
+          }
+        }
+      }}
+    >
+      <StyledIconButton onClick={onClick}>
         {value ? (
-          <Badge badgeContent={value} color="error">
+          <StyledBadge badgeContent={value}>
             {icon}
-          </Badge>
+          </StyledBadge>
         ) : (
           icon
         )}
-      </IconButton>
+      </StyledIconButton>
     </Tooltip>
   );
 };
