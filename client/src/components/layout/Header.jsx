@@ -89,16 +89,68 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
+// Enhanced Badge with better visibility and positioning
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #ff4444 0%, #ff6666 100%)",
     color: "white",
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: "11px",
     minWidth: "18px",
     height: "18px",
-    boxShadow: "0 2px 8px rgba(102, 126, 234, 0.4)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
+    borderRadius: "9px",
+    padding: "0 4px",
+    // Enhanced shadow and border for better visibility
+    boxShadow: `
+      0 0 0 2px rgba(15, 15, 15, 0.9),
+      0 0 0 3px rgba(255, 68, 68, 0.5),
+      0 4px 12px rgba(255, 68, 68, 0.8),
+      0 2px 6px rgba(0, 0, 0, 0.6)
+    `,
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    // Positioning adjustments for better visibility
+    right: "-6px",
+    top: "-6px",
+    // Ensure it's always on top
+    zIndex: 10,
+    
+    // Pulsing animation for new notifications
+    animation: "notificationPulse 2s infinite ease-in-out",
+    
+    "@keyframes notificationPulse": {
+      "0%": {
+        transform: "scale(1)",
+        boxShadow: `
+          0 0 0 2px rgba(15, 15, 15, 0.9),
+          0 0 0 3px rgba(255, 68, 68, 0.5),
+          0 4px 12px rgba(255, 68, 68, 0.8),
+          0 2px 6px rgba(0, 0, 0, 0.6)
+        `,
+      },
+      "50%": {
+        transform: "scale(1.1)",
+        boxShadow: `
+          0 0 0 2px rgba(15, 15, 15, 0.9),
+          0 0 0 4px rgba(255, 68, 68, 0.7),
+          0 6px 20px rgba(255, 68, 68, 1),
+          0 4px 12px rgba(0, 0, 0, 0.8)
+        `,
+      },
+      "100%": {
+        transform: "scale(1)",
+        boxShadow: `
+          0 0 0 2px rgba(15, 15, 15, 0.9),
+          0 0 0 3px rgba(255, 68, 68, 0.5),
+          0 4px 12px rgba(255, 68, 68, 0.8),
+          0 2px 6px rgba(0, 0, 0, 0.6)
+        `,
+      },
+    },
+  },
+  
+  // Ensure the badge doesn't get clipped
+  "& .MuiBadge-root": {
+    overflow: "visible",
   },
 }));
 
@@ -129,7 +181,18 @@ const Header = () => {
   const { isSearch, isNotification, isNewGroup } = useSelector(
     (state) => state.misc
   );
+  
+  // Get the entire chat state for debugging
+  const chatState = useSelector((state) => state.chat);
   const { notificationCount } = useSelector((state) => state.chat);
+  
+  // Debug logging
+  React.useEffect(() => {
+    console.log("=== NOTIFICATION DEBUG ===");
+    console.log("Full chat state:", chatState);
+    console.log("notificationCount:", notificationCount);
+    console.log("Type of notificationCount:", typeof notificationCount);
+  }, [chatState, notificationCount]);
 
   const handleMobile = () => dispatch(setIsMobile(true));
 
@@ -188,7 +251,7 @@ const Header = () => {
             
             <Box sx={{ flexGrow: 1 }} />
             
-            <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <IconBtn
                 title={"Search"}
                 icon={<SearchIcon />}
@@ -212,6 +275,7 @@ const Header = () => {
                 icon={<NotificationsIcon />}
                 onClick={openNotification}
                 value={notificationCount}
+                debug={true} // Add debug prop
               />
 
               <IconBtn
@@ -262,8 +326,20 @@ const IconBtn = ({ title, icon, onClick, value }) => {
       }}
     >
       <StyledIconButton onClick={onClick}>
-        {value ? (
-          <StyledBadge badgeContent={value}>
+        {value && value > 0 ? (
+          <StyledBadge 
+            badgeContent={value} 
+            max={99}
+            // Ensure badge is always visible
+            sx={{
+              "& .MuiBadge-badge": {
+                // Force visibility
+                visibility: "visible !important",
+                opacity: "1 !important",
+                display: "flex !important",
+              }
+            }}
+          >
             {icon}
           </StyledBadge>
         ) : (
