@@ -8,6 +8,7 @@ import Table from "../../components/shared/Table";
 import { server } from "../../constants/config";
 import { useErrors } from "../../hooks/hook";
 import { fileFormat, transformImage } from "../../lib/features";
+import { Skeleton } from "@mui/material";
 
 const columns = [
   {
