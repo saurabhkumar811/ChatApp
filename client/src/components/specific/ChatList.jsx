@@ -3,7 +3,11 @@ import { styled } from "@mui/material/styles";
 import React from "react";
 import ChatItem from "../shared/ChatItem";
 
-const StyledChatContainer = styled(Stack)(({ theme }) => ({
+// Main container that holds the entire chat list
+const ChatListWrapper = styled(Box)(({ theme }) => ({
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
   background: `
     linear-gradient(180deg, 
       rgba(20, 20, 20, 0.98) 0%, 
@@ -20,6 +24,29 @@ const StyledChatContainer = styled(Stack)(({ theme }) => ({
   borderRadius: "16px 0 0 16px",
   position: "relative",
   overflow: "hidden",
+  
+  // Subtle grid pattern overlay
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `
+      linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px)
+    `,
+    backgroundSize: "20px 20px",
+    opacity: 0.5,
+    pointerEvents: "none",
+  },
+}));
+
+const StyledChatContainer = styled(Stack)(({ theme }) => ({
+  flex: 1, // Take remaining space after header
+  overflow: "auto", // Only this section scrolls
+  position: "relative",
   
   // Custom scrollbar
   "&::-webkit-scrollbar": {
@@ -39,34 +66,22 @@ const StyledChatContainer = styled(Stack)(({ theme }) => ({
     },
   },
   
-  // Subtle grid pattern overlay
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundImage: `
-      linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px)
-    `,
-    backgroundSize: "20px 20px",
-    opacity: 0.5,
-    pointerEvents: "none",
-  },
+  // Firefox scrollbar styling
+  scrollbarWidth: "thin",
+  scrollbarColor: "rgba(102, 126, 234, 0.4) rgba(255, 255, 255, 0.02)",
   
-  // Top gradient fade
+  // Top gradient fade for smooth transition with header
   "&::after": {
     content: '""',
-    position: "absolute",
+    position: "sticky",
     top: 0,
     left: 0,
     right: 0,
-    height: "20px",
-    background: "linear-gradient(180deg, rgba(20, 20, 20, 0.8) 0%, transparent 100%)",
+    height: "10px",
+    background: "linear-gradient(180deg, rgba(20, 20, 20, 0.6) 0%, transparent 100%)",
     pointerEvents: "none",
     zIndex: 1,
+    marginBottom: "-10px",
   },
 }));
 
@@ -94,8 +109,8 @@ const FloatingAccent = styled(Box)(({ theme }) => ({
 }));
 
 const ChatListHeader = styled(Box)(({ theme }) => ({
-  position: "sticky",
-  top: 0,
+  position: "relative", // Changed from sticky to relative
+  flexShrink: 0, // Prevent header from shrinking
   background: `
     linear-gradient(180deg, 
       rgba(30, 30, 30, 0.95) 0%, 
@@ -105,7 +120,7 @@ const ChatListHeader = styled(Box)(({ theme }) => ({
   backdropFilter: "blur(15px)",
   borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
   padding: "16px 20px 12px 20px",
-  zIndex: 2,
+  zIndex: 3,
   
   "&::before": {
     content: '""',
@@ -138,45 +153,8 @@ const ChatList = ({
   handleDeleteChat,
 }) => {
   return (
-    <StyledChatContainer 
-      width={w} 
-      direction={"column"} 
-      overflow={"auto"} 
-      height={"100%"}
-    >
-      {/* Floating accent elements */}
-      <FloatingAccent 
-        sx={{ 
-          top: "15%", 
-          left: "10%", 
-          width: "80px", 
-          height: "80px",
-          background: "linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%)",
-          animationDelay: "0s"
-        }} 
-      />
-      <FloatingAccent 
-        sx={{ 
-          top: "60%", 
-          right: "15%", 
-          width: "60px", 
-          height: "60px",
-          background: "linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%)",
-          animationDelay: "4s"
-        }} 
-      />
-      <FloatingAccent 
-        sx={{ 
-          bottom: "20%", 
-          left: "20%", 
-          width: "70px", 
-          height: "70px",
-          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(102, 126, 234, 0.06) 100%)",
-          animationDelay: "8s"
-        }} 
-      />
-
-      {/* Optional header section */}
+    <ChatListWrapper style={{ width: w }}>
+      {/* Fixed Header - This will never scroll */}
       <ChatListHeader>
         <Box
           sx={{
@@ -194,51 +172,89 @@ const ChatList = ({
         </Box>
       </ChatListHeader>
 
-      <ChatItemsContainer>
-        {chats?.map((data, index) => {
-          const { avatar, _id, name, groupChat, members } = data;
+      {/* Scrollable Content Container */}
+      <StyledChatContainer 
+        direction={"column"} 
+        height={"100%"}
+      >
+        {/* Floating accent elements */}
+        <FloatingAccent 
+          sx={{ 
+            top: "15%", 
+            left: "10%", 
+            width: "80px", 
+            height: "80px",
+            background: "linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%)",
+            animationDelay: "0s"
+          }} 
+        />
+        <FloatingAccent 
+          sx={{ 
+            top: "60%", 
+            right: "15%", 
+            width: "60px", 
+            height: "60px",
+            background: "linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%)",
+            animationDelay: "4s"
+          }} 
+        />
+        <FloatingAccent 
+          sx={{ 
+            bottom: "20%", 
+            left: "20%", 
+            width: "70px", 
+            height: "70px",
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(102, 126, 234, 0.06) 100%)",
+            animationDelay: "8s"
+          }} 
+        />
 
-          const newMessageAlert = newMessagesAlert.find(
-            ({ chatId }) => chatId === _id
-          );
+        <ChatItemsContainer>
+          {chats?.map((data, index) => {
+            const { avatar, _id, name, groupChat, members } = data;
 
-          const isOnline = members?.some((member) =>
-            onlineUsers.includes(member)
-          );
+            const newMessageAlert = newMessagesAlert.find(
+              ({ chatId }) => chatId === _id
+            );
 
-          return (
-            <Box
-              key={_id}
-              sx={{
-                marginBottom: "4px",
-                "&:last-child": {
-                  marginBottom: 0,
-                },
-                // Add subtle hover effect to container
-                borderRadius: "12px",
-                transition: "all 0.2s ease",
-                "&:hover": {
-                  background: "rgba(255, 255, 255, 0.02)",
-                  transform: "translateX(2px)",
-                },
-              }}
-            >
-              <ChatItem
-                index={index}
-                newMessageAlert={newMessageAlert}
-                isOnline={isOnline}
-                avatar={avatar}
-                name={name}
-                _id={_id}
-                groupChat={groupChat}
-                sameSender={chatId === _id}
-                handleDeleteChat={handleDeleteChat}
-              />
-            </Box>
-          );
-        })}
-      </ChatItemsContainer>
-    </StyledChatContainer>
+            const isOnline = members?.some((member) =>
+              onlineUsers.includes(member)
+            );
+
+            return (
+              <Box
+                key={_id}
+                sx={{
+                  marginBottom: "4px",
+                  "&:last-child": {
+                    marginBottom: 0,
+                  },
+                  // Add subtle hover effect to container
+                  borderRadius: "12px",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    background: "rgba(255, 255, 255, 0.02)",
+                    transform: "translateX(2px)",
+                  },
+                }}
+              >
+                <ChatItem
+                  index={index}
+                  newMessageAlert={newMessageAlert}
+                  isOnline={isOnline}
+                  avatar={avatar}
+                  name={name}
+                  _id={_id}
+                  groupChat={groupChat}
+                  sameSender={chatId === _id}
+                  handleDeleteChat={handleDeleteChat}
+                />
+              </Box>
+            );
+          })}
+        </ChatItemsContainer>
+      </StyledChatContainer>
+    </ChatListWrapper>
   );
 };
 

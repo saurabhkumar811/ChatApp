@@ -9,6 +9,15 @@ import {
 import moment from "moment";
 import { transformImage } from "../../lib/features";
 
+// Main container that ensures the profile stays within bounds
+const ProfileWrapper = styled(Box)(({ theme }) => ({
+  height: "100%",
+  width: "100%",
+  overflow: "hidden", // Prevent the wrapper from overflowing
+  display: "flex",
+  flexDirection: "column",
+}));
+
 const StyledProfileContainer = styled(Stack)(({ theme }) => ({
   background: `
     linear-gradient(180deg, 
@@ -23,15 +32,39 @@ const StyledProfileContainer = styled(Stack)(({ theme }) => ({
   `,
   backdropFilter: "blur(20px)",
   borderRadius: "24px",
-  padding: "2.5rem 2rem",
+  padding: "1.5rem 1rem", // Much smaller padding
   position: "relative",
-  overflow: "hidden",
+  overflow: "auto", // Enable scrolling for the profile content
   border: "1px solid rgba(255, 255, 255, 0.1)",
   boxShadow: `
     0 20px 60px rgba(0, 0, 0, 0.4),
     0 8px 32px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1)
   `,
+  height: "100%",
+  maxHeight: "100%", // Ensure it doesn't exceed parent height
+  
+  // Custom scrollbar styling
+  "&::-webkit-scrollbar": {
+    width: "6px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "rgba(255, 255, 255, 0.05)",
+    borderRadius: "3px",
+    margin: "8px 0",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "linear-gradient(180deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%)",
+    borderRadius: "3px",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      background: "linear-gradient(180deg, rgba(102, 126, 234, 0.6) 0%, rgba(118, 75, 162, 0.6) 100%)",
+    },
+  },
+  
+  // Firefox scrollbar styling
+  scrollbarWidth: "thin",
+  scrollbarColor: "rgba(102, 126, 234, 0.4) rgba(255, 255, 255, 0.05)",
   
   // Subtle pattern overlay
   "&::before": {
@@ -68,10 +101,10 @@ const StyledProfileContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
-  width: 220,
-  height: 220,
+  width: 120, // Much smaller avatar
+  height: 120, // Much smaller avatar
   objectFit: "cover",
-  marginBottom: "2rem",
+  marginBottom: "1rem", // Smaller margin
   border: "4px solid rgba(255, 255, 255, 0.1)",
   boxShadow: `
     0 20px 40px rgba(0, 0, 0, 0.3),
@@ -81,6 +114,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
   background: "linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.08) 100%)",
   position: "relative",
   transition: "all 0.3s ease",
+  flexShrink: 0, // Prevent avatar from shrinking
   
   "&:hover": {
     transform: "scale(1.05)",
@@ -112,12 +146,13 @@ const ProfileCardContainer = styled(Stack)(({ theme }) => ({
   background: "linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.02) 100%)",
   backdropFilter: "blur(10px)",
   border: "1px solid rgba(255, 255, 255, 0.08)",
-  borderRadius: "16px",
-  padding: "20px 24px",
+  borderRadius: "12px", // Smaller border radius
+  padding: "12px 16px", // Much smaller padding
   width: "100%",
-  maxWidth: "320px",
+  maxWidth: "100%", // Use full width available
   position: "relative",
   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  flexShrink: 0, // Prevent cards from shrinking
   
   "&:hover": {
     background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)",
@@ -145,9 +180,9 @@ const ProfileCardContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const IconContainer = styled(Box)(({ theme }) => ({
-  width: "48px",
-  height: "48px",
-  borderRadius: "12px",
+  width: "32px", // Much smaller
+  height: "32px", // Much smaller
+  borderRadius: "8px", // Smaller border radius
   background: "linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%)",
   display: "flex",
   alignItems: "center",
@@ -155,9 +190,10 @@ const IconContainer = styled(Box)(({ theme }) => ({
   border: "1px solid rgba(102, 126, 234, 0.2)",
   backdropFilter: "blur(5px)",
   transition: "all 0.3s ease",
+  flexShrink: 0,
   
   "& .MuiSvgIcon-root": {
-    fontSize: "24px",
+    fontSize: "16px", // Much smaller icons
     background: "linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.7) 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
@@ -166,21 +202,22 @@ const IconContainer = styled(Box)(({ theme }) => ({
 }));
 
 const MainText = styled(Typography)(({ theme }) => ({
-  fontSize: "16px",
+  fontSize: "12px", // Much smaller text
   fontWeight: 600,
-  letterSpacing: "0.3px",
-  marginBottom: "4px",
+  letterSpacing: "0.2px", // Reduced letter spacing
+  marginBottom: "2px", // Smaller margin
   background: "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
   backgroundClip: "text",
   lineHeight: 1.4,
+  wordBreak: "break-word", // Handle long text better
 }));
 
 const SubText = styled(Typography)(({ theme }) => ({
-  fontSize: "12px",
+  fontSize: "9px", // Much smaller text
   fontWeight: 500,
-  letterSpacing: "0.5px",
+  letterSpacing: "0.3px", // Reduced letter spacing
   textTransform: "uppercase",
   color: "rgba(255, 255, 255, 0.5)",
   transition: "color 0.3s ease",
@@ -212,59 +249,61 @@ const FloatingParticle = styled(Box)(({ theme }) => ({
 
 const Profile = ({ user }) => {
   return (
-    <StyledProfileContainer spacing={3} direction={"column"} alignItems={"center"}>
-      {/* Floating particles */}
-      <FloatingParticle 
-        sx={{ 
-          top: "10%", 
-          left: "15%", 
-          width: "60px", 
-          height: "60px",
-          animationDelay: "0s"
-        }} 
-      />
-      <FloatingParticle 
-        sx={{ 
-          top: "70%", 
-          right: "10%", 
-          width: "40px", 
-          height: "40px",
-          animationDelay: "3s"
-        }} 
-      />
-      <FloatingParticle 
-        sx={{ 
-          bottom: "20%", 
-          left: "20%", 
-          width: "50px", 
-          height: "50px",
-          animationDelay: "6s"
-        }} 
-      />
+    <ProfileWrapper>
+              <StyledProfileContainer spacing={1.5} direction={"column"} alignItems={"center"}>
+        {/* Floating particles */}
+        <FloatingParticle 
+          sx={{ 
+            top: "10%", 
+            left: "15%", 
+            width: "25px", // Even smaller particles
+            height: "25px",
+            animationDelay: "0s"
+          }} 
+        />
+        <FloatingParticle 
+          sx={{ 
+            top: "70%", 
+            right: "10%", 
+            width: "20px", 
+            height: "20px",
+            animationDelay: "3s"
+          }} 
+        />
+        <FloatingParticle 
+          sx={{ 
+            bottom: "20%", 
+            left: "20%", 
+            width: "22px", 
+            height: "22px",
+            animationDelay: "6s"
+          }} 
+        />
 
-      <StyledAvatar
-        src={transformImage(user?.avatar?.url)}
-      />
-      
-      <Stack spacing={2.5} width="100%" alignItems="center">
-        <ProfileCard heading={"Bio"} text={user?.bio || "No bio available"} />
-        <ProfileCard
-          heading={"Username"}
-          text={user?.username}
-          Icon={<UserNameIcon />}
+        <StyledAvatar
+          src={transformImage(user?.avatar?.url)}
         />
-        <ProfileCard 
-          heading={"Name"} 
-          text={user?.name} 
-          Icon={<FaceIcon />} 
-        />
-        <ProfileCard
-          heading={"Joined"}
-          text={moment(user?.createdAt).fromNow()}
-          Icon={<CalendarIcon />}
-        />
-      </Stack>
-    </StyledProfileContainer>
+        
+        <Stack spacing={1.5} width="100%" alignItems="center"> {/* Much smaller spacing */}
+          <ProfileCard heading={"Bio"} text={user?.bio || "No bio available"} />
+          <ProfileCard
+            heading={"Username"}
+            text={user?.username}
+            Icon={<UserNameIcon />}
+          />
+          <ProfileCard 
+            heading={"Name"} 
+            text={user?.name} 
+            Icon={<FaceIcon />} 
+          />
+          <ProfileCard
+            heading={"Joined"}
+            text={moment(user?.createdAt).fromNow()}
+            Icon={<CalendarIcon />}
+          />
+        </Stack>
+      </StyledProfileContainer>
+    </ProfileWrapper>
   );
 };
 
@@ -272,7 +311,7 @@ const ProfileCard = ({ text, Icon, heading }) => (
   <ProfileCardContainer
     direction={"row"}
     alignItems={"center"}
-    spacing={3}
+    spacing={1.5} // Much smaller spacing
   >
     {Icon && (
       <IconContainer>
