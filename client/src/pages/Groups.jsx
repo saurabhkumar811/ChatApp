@@ -19,12 +19,12 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React, { Suspense, lazy, memo, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { LayoutLoader } from "../components/layout/Loaders";
 import AvatarCard from "../components/shared/AvatarCard";
 import { Link } from "../components/styles/StyledComponents";
-import { bgGradient, matBlack } from "../constants/color";
 import { useDispatch, useSelector } from "react-redux";
 import UserItem from "../components/shared/UserItem";
 import { useAsyncMutation, useErrors } from "../hooks/hook";
@@ -36,6 +36,212 @@ import {
   useRenameGroupMutation,
 } from "../redux/api/api";
 import { setIsAddMember } from "../redux/reducers/misc";
+
+// Styled Components
+const StyledContainer = styled(Grid)(({ theme }) => ({
+  background: `
+    linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 25%, #0f0f0f 50%, #1e1e1e 75%, #0d0d0d 100%)
+  `,
+  position: "relative",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: `
+      linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.01) 50%, transparent 51%),
+      linear-gradient(-45deg, transparent 49%, rgba(255, 255, 255, 0.01) 50%, transparent 51%)
+    `,
+    backgroundSize: "40px 40px",
+    opacity: 0.3,
+  },
+}));
+
+const GroupsSidebar = styled(Stack)(({ theme }) => ({
+  background: `
+    linear-gradient(180deg, rgba(15, 15, 15, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%)
+  `,
+  backdropFilter: "blur(20px)",
+  borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+  position: "relative",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: "1px",
+    height: "100%",
+    background: "linear-gradient(180deg, transparent 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%)",
+  },
+  "&::-webkit-scrollbar": {
+    width: "6px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "rgba(255, 255, 255, 0.05)",
+    borderRadius: "3px",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "rgba(102, 126, 234, 0.3)",
+    borderRadius: "3px",
+    "&:hover": {
+      background: "rgba(102, 126, 234, 0.5)",
+    },
+  },
+}));
+
+const MainContent = styled(Grid)(({ theme }) => ({
+  background: `
+    linear-gradient(135deg, rgba(15, 15, 15, 0.8) 0%, rgba(10, 10, 10, 0.8) 100%)
+  `,
+  backdropFilter: "blur(20px)",
+  position: "relative",
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  background: "rgba(15, 15, 15, 0.9)",
+  backdropFilter: "blur(10px)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  color: "rgba(255, 255, 255, 0.8)",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    background: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    color: "#ffffff",
+    transform: "translateY(-1px)",
+    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.4)",
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: "12px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    color: "#ffffff",
+    backdropFilter: "blur(10px)",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 255, 255, 0.08)",
+      borderColor: "rgba(255, 255, 255, 0.2)",
+    },
+    "&.Mui-focused": {
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+      borderColor: "#667eea",
+      boxShadow: "0 0 0 2px rgba(102, 126, 234, 0.2)",
+    },
+    "& fieldset": {
+      border: "none",
+    },
+  },
+  "& .MuiOutlinedInput-input": {
+    color: "#ffffff",
+    "&::placeholder": {
+      color: "rgba(255, 255, 255, 0.5)",
+    },
+  },
+}));
+
+const GradientButton = styled(Button)(({ theme }) => ({
+  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+  color: "white",
+  borderRadius: "12px",
+  padding: "12px 24px",
+  fontSize: "16px",
+  fontWeight: 600,
+  textTransform: "none",
+  boxShadow: "0 4px 16px rgba(102, 126, 234, 0.4)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+    boxShadow: "0 6px 20px rgba(102, 126, 234, 0.6)",
+    transform: "translateY(-2px)",
+  },
+  "&:active": {
+    transform: "translateY(0)",
+  },
+}));
+
+const DangerButton = styled(Button)(({ theme }) => ({
+  background: "linear-gradient(135deg, #ff4757 0%, #c44569 100%)",
+  color: "white",
+  borderRadius: "12px",
+  padding: "12px 24px",
+  fontSize: "16px",
+  fontWeight: 600,
+  textTransform: "none",
+  boxShadow: "0 4px 16px rgba(255, 71, 87, 0.4)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    background: "linear-gradient(135deg, #ff3742 0%, #b33a5a 100%)",
+    boxShadow: "0 6px 20px rgba(255, 71, 87, 0.6)",
+    transform: "translateY(-2px)",
+  },
+  "&:active": {
+    transform: "translateY(0)",
+  },
+}));
+
+const GroupNameContainer = styled(Stack)(({ theme }) => ({
+  background: "rgba(15, 15, 15, 0.8)",
+  backdropFilter: "blur(20px)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  borderRadius: "20px",
+  padding: "2rem",
+  margin: "1rem 0",
+  boxShadow: `
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1)
+  `,
+  position: "relative",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "2px",
+    background: "linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.5) 50%, transparent 100%)",
+    borderTopLeftRadius: "20px",
+    borderTopRightRadius: "20px",
+  },
+}));
+
+const StyledTypography = styled(Typography)(({ theme }) => ({
+  background: "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundClip: "text",
+  fontWeight: 600,
+  letterSpacing: "0.5px",
+}));
+
+const MembersContainer = styled(Stack)(({ theme }) => ({
+  background: "rgba(10, 10, 10, 0.6)",
+  backdropFilter: "blur(10px)",
+  border: "1px solid rgba(255, 255, 255, 0.05)",
+  borderRadius: "16px",
+  padding: "1rem",
+  "&::-webkit-scrollbar": {
+    width: "6px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "rgba(255, 255, 255, 0.05)",
+    borderRadius: "3px",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "rgba(102, 126, 234, 0.3)",
+    borderRadius: "3px",
+    "&:hover": {
+      background: "rgba(102, 126, 234, 0.5)",
+    },
+  },
+}));
 
 const ConfirmDeleteDialog = lazy(() =>
   import("../components/dialogs/ConfirmDeleteDialog")
@@ -171,64 +377,63 @@ const Groups = () => {
             position: "fixed",
             right: "1rem",
             top: "1rem",
+            zIndex: 1000,
           },
         }}
       >
-        <IconButton onClick={handleMobile}>
+        <StyledIconButton onClick={handleMobile}>
           <MenuIcon />
-        </IconButton>
+        </StyledIconButton>
       </Box>
 
-      <Tooltip title="back">
-        <IconButton
+      <Tooltip title="Back to Chat">
+        <StyledIconButton
           sx={{
             position: "absolute",
             top: "2rem",
             left: "2rem",
-            bgcolor: matBlack,
-            color: "white",
-            ":hover": {
-              bgcolor: "rgba(0,0,0,0.7)",
-            },
+            zIndex: 100,
           }}
           onClick={navigateBack}
         >
           <KeyboardBackspaceIcon />
-        </IconButton>
+        </StyledIconButton>
       </Tooltip>
     </>
   );
 
   const GroupName = (
-    <Stack
+    <GroupNameContainer
       direction={"row"}
       alignItems={"center"}
       justifyContent={"center"}
       spacing={"1rem"}
-      padding={"3rem"}
     >
       {isEdit ? (
         <>
-          <TextField
+          <StyledTextField
             value={groupNameUpdatedValue}
             onChange={(e) => setGroupNameUpdatedValue(e.target.value)}
+            placeholder="Enter group name"
+            variant="outlined"
+            size="medium"
           />
-          <IconButton onClick={updateGroupName} disabled={isLoadingGroupName}>
+          <StyledIconButton onClick={updateGroupName} disabled={isLoadingGroupName}>
             <DoneIcon />
-          </IconButton>
+          </StyledIconButton>
         </>
       ) : (
         <>
-          <Typography variant="h4">{groupName}</Typography>
-          <IconButton
+          <StyledTypography variant="h4">{groupName}</StyledTypography>
+          <StyledIconButton
             disabled={isLoadingGroupName}
             onClick={() => setIsEdit(true)}
           >
             <EditIcon />
-          </IconButton>
+          </StyledIconButton>
         </>
       )}
-    </Stack>
+    </GroupNameContainer>
   );
 
   const ButtonGroup = (
@@ -239,34 +444,41 @@ const Groups = () => {
       }}
       spacing={"1rem"}
       p={{
-        xs: "0",
-        sm: "1rem",
-        md: "1rem 4rem",
+        xs: "1rem",
+        sm: "2rem",
+        md: "2rem 4rem",
       }}
+      sx={{ mt: 3 }}
     >
-      <Button
+      <DangerButton
         size="large"
-        color="error"
         startIcon={<DeleteIcon />}
         onClick={openConfirmDeleteHandler}
       >
         Delete Group
-      </Button>
-      <Button
+      </DangerButton>
+      <GradientButton
         size="large"
-        variant="contained"
         startIcon={<AddIcon />}
         onClick={openAddMemberHandler}
       >
         Add Member
-      </Button>
+      </GradientButton>
     </Stack>
   );
 
   return myGroups.isLoading ? (
-    <LayoutLoader />
+    <Box sx={{ 
+      background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
+      height: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }}>
+      <LayoutLoader />
+    </Box>
   ) : (
-    <Grid container height={"100vh"}>
+    <StyledContainer container height={"100vh"}>
       <Grid
         item
         sx={{
@@ -280,7 +492,7 @@ const Groups = () => {
         <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} />
       </Grid>
 
-      <Grid
+      <MainContent
         item
         xs={12}
         sm={8}
@@ -298,31 +510,29 @@ const Groups = () => {
           <>
             {GroupName}
 
-            <Typography
-              margin={"2rem"}
-              alignSelf={"flex-start"}
-              variant="body1"
+            <StyledTypography
+              variant="h6"
+              sx={{ 
+                margin: "2rem 0 1rem 0",
+                alignSelf: "flex-start",
+                opacity: 0.8
+              }}
             >
-              Members
-            </Typography>
+              Members ({members.length})
+            </StyledTypography>
 
-            <Stack
+            <MembersContainer
               maxWidth={"45rem"}
               width={"100%"}
               boxSizing={"border-box"}
-              padding={{
-                sm: "1rem",
-                xs: "0",
-                md: "1rem 4rem",
-              }}
-              spacing={"2rem"}
+              spacing={"1rem"}
               height={"50vh"}
               overflow={"auto"}
             >
-              {/* Members */}
-
               {isLoadingRemoveMember ? (
-                <CircularProgress />
+                <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                  <CircularProgress sx={{ color: "#667eea" }} />
+                </Box>
               ) : (
                 members.map((i) => (
                   <UserItem
@@ -330,29 +540,37 @@ const Groups = () => {
                     key={i._id}
                     isAdded
                     styling={{
-                      boxShadow: "0 0 0.5rem  rgba(0,0,0,0.2)",
+                      background: "rgba(15, 15, 15, 0.8)",
+                      backdropFilter: "blur(10px)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
                       padding: "1rem 2rem",
-                      borderRadius: "1rem",
+                      borderRadius: "16px",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.4)",
+                      }
                     }}
                     handler={removeMemberHandler}
                   />
                 ))
               )}
-            </Stack>
+            </MembersContainer>
 
             {ButtonGroup}
           </>
         )}
-      </Grid>
+      </MainContent>
 
       {isAddMember && (
-        <Suspense fallback={<Backdrop open />}>
+        <Suspense fallback={<Backdrop open sx={{ backdropFilter: "blur(10px)" }} />}>
           <AddMemberDialog chatId={chatId} />
         </Suspense>
       )}
 
       {confirmDeleteDialog && (
-        <Suspense fallback={<Backdrop open />}>
+        <Suspense fallback={<Backdrop open sx={{ backdropFilter: "blur(10px)" }} />}>
           <ConfirmDeleteDialog
             open={confirmDeleteDialog}
             handleClose={closeConfirmDeleteHandler}
@@ -367,6 +585,11 @@ const Groups = () => {
             xs: "block",
             sm: "none",
           },
+          "& .MuiDrawer-paper": {
+            background: "rgba(15, 15, 15, 0.95)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+          }
         }}
         open={isMobileMenuOpen}
         onClose={handleMobileClose}
@@ -377,17 +600,17 @@ const Groups = () => {
           chatId={chatId}
         />
       </Drawer>
-    </Grid>
+    </StyledContainer>
   );
 };
 
 const GroupsList = ({ w = "100%", myGroups = [], chatId }) => (
-  <Stack
+  <GroupsSidebar
     width={w}
     sx={{
-      backgroundImage: bgGradient,
       height: "100vh",
       overflow: "auto",
+      padding: "1rem",
     }}
   >
     {myGroups.length > 0 ? (
@@ -395,18 +618,50 @@ const GroupsList = ({ w = "100%", myGroups = [], chatId }) => (
         <GroupListItem group={group} chatId={chatId} key={group._id} />
       ))
     ) : (
-      <Typography textAlign={"center"} padding="1rem">
-        No groups
-      </Typography>
+      <Box sx={{ 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        height: "200px",
+        background: "rgba(15, 15, 15, 0.8)",
+        borderRadius: "16px",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
+        mt: 2
+      }}>
+        <StyledTypography variant="body1" sx={{ opacity: 0.6 }}>
+          No groups found
+        </StyledTypography>
+      </Box>
     )}
-  </Stack>
+  </GroupsSidebar>
 );
 
 const GroupListItem = memo(({ group, chatId }) => {
   const { name, avatar, _id } = group;
 
+  const StyledLink = styled(Link)(({ theme }) => ({
+    display: "block",
+    padding: "1rem",
+    margin: "0.5rem 0",
+    background: chatId === _id 
+      ? "linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)"
+      : "rgba(15, 15, 15, 0.6)",
+    backdropFilter: "blur(10px)",
+    border: `1px solid ${chatId === _id ? "rgba(102, 126, 234, 0.3)" : "rgba(255, 255, 255, 0.1)"}`,
+    borderRadius: "16px",
+    textDecoration: "none",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      background: chatId === _id 
+        ? "linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)"
+        : "rgba(255, 255, 255, 0.1)",
+      transform: "translateY(-2px)",
+      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
+    },
+  }));
+
   return (
-    <Link
+    <StyledLink
       to={`?group=${_id}`}
       onClick={(e) => {
         if (chatId === _id) e.preventDefault();
@@ -414,9 +669,11 @@ const GroupListItem = memo(({ group, chatId }) => {
     >
       <Stack direction={"row"} spacing={"1rem"} alignItems={"center"}>
         <AvatarCard avatar={avatar} />
-        <Typography>{name}</Typography>
+        <StyledTypography variant="body1" sx={{ fontSize: "16px" }}>
+          {name}
+        </StyledTypography>
       </Stack>
-    </Link>
+    </StyledLink>
   );
 });
 
